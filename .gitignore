@@ -1,0 +1,2 @@
+# Trained model is ~175 MB (over GitHub 100 MB limit) - recreate it by running Stage_7_Optimization.ipynb
+models/final_model.joblib

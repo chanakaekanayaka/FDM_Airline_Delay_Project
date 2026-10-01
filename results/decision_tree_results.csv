@@ -1,0 +1,2 @@
+Model,Baseline Accuracy,Baseline Precision,Baseline Recall,Baseline F1 (macro),Baseline F1 std,Baseline Train F1,Baseline CV time (s),Baseline High Risk Recall,Tuned F1,Best Params
+Decision Tree,0.5624479647545808,0.5510730053127783,0.5510620321394899,0.5510566183150355,0.0037374386703193,0.9987594454160588,6.188184022903442,0.5032351776046481,0.5847662691915361,"{""max_depth"": 20, ""min_samples_leaf"": 20}"
