@@ -1,0 +1,261 @@
+{%- macro icon(name, cls="") -%}
+{%- set paths = {
+  "plane": '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
+  "pin": '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+  "calendar": '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  "clock": '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  "chart": '<path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/>',
+  "shield": '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+  "alert": '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/>',
+  "bulb": '<path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/>',
+  "database": '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/><path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/>',
+  "cpu": '<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/>',
+  "target": '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  "info": '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+  "arrow": '<path d="M5 12h14M12 5l7 7-7 7"/>',
+  "reset": '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>'
+} -%}
+<svg class="icon {{ cls }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ paths[name] | safe }}</svg>
+{%- endmacro -%}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flight Delay Risk Checker</title>
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <!-- ============ Top bar + hero ============ -->
+  <header class="hero">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <nav class="container topbar">
+      <div class="brand">
+        <span class="brand-mark">{{ icon("plane") }}</span>
+        <span class="brand-name">Delay<span>Risk</span></span>
+      </div>
+      <span class="status" id="status" data-state="checking">
+        <span class="status-dot"></span><span id="status-text">Connecting...</span>
+      </span>
+    </nav>
+
+    <div class="container hero-content">
+      <p class="eyebrow">Airline operations planning tool</p>
+      <h1>Flight Delay Risk Checker</h1>
+      <p class="hero-sub">Find out how likely an airline's arrivals at an airport are to be delayed in a given
+        month &ndash; and what to do about it &ndash; in a few seconds.</p>
+
+      <div class="stats">
+        <div class="stat"><strong>{{ n_years }}</strong><span>years of flight data</span></div>
+        <div class="stat"><strong>{{ carriers | length }}</strong><span>airlines</span></div>
+        <div class="stat"><strong>{{ airports | length }}</strong><span>U.S. airports</span></div>
+        <div class="stat"><strong>3</strong><span>risk levels</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container layout">
+    <!-- ============ Input form ============ -->
+    <section class="card form-card" aria-labelledby="form-title">
+      <div class="card-head">
+        <span class="step">1</span>
+        <div>
+          <h2 id="form-title">Route details</h2>
+          <p class="muted">Fill in all five fields.</p>
+        </div>
+      </div>
+
+      <form id="risk-form" novalidate>
+        <div class="field">
+          <label for="carrier">Airline</label>
+          <div class="control">
+            {{ icon("plane", "lead") }}
+            <select id="carrier" name="carrier" required aria-describedby="carrier-error">
+              <option value="">Select an airline</option>
+              {% for code, name in carriers %}
+              <option value="{{ code }}">{{ name }} ({{ code }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <p class="error" id="carrier-error" role="alert"></p>
+        </div>
+
+        <div class="field">
+          <label for="airport">Arrival airport</label>
+          <div class="control">
+            {{ icon("pin", "lead") }}
+            <input id="airport" name="airport" list="airport-list" required autocomplete="off"
+                   placeholder="Code or city, e.g. ATL or Atlanta"
+                   aria-describedby="airport-name airport-error">
+          </div>
+          <datalist id="airport-list">
+            {% for code, name in airports %}
+            <option value="{{ code }}" label="{{ name }}">{{ name }}</option>
+            {% endfor %}
+          </datalist>
+          <p class="help" id="airport-name">3-letter airport code. Start typing to search.</p>
+          <p class="error" id="airport-error" role="alert"></p>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="month">Month</label>
+            <div class="control">
+              {{ icon("calendar", "lead") }}
+              <select id="month" name="month" required aria-describedby="month-error">
+                <option value="">Select</option>
+                {% for number, name in months %}
+                <option value="{{ number }}">{{ name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <p class="error" id="month-error" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="year">Year</label>
+            <div class="control">
+              {{ icon("clock", "lead") }}
+              <input id="year" name="year" type="number" required inputmode="numeric"
+                     min="{{ first_year }}" max="{{ last_year }}" step="1" placeholder="e.g. 2026"
+                     aria-describedby="year-error">
+            </div>
+            <p class="error" id="year-error" role="alert"></p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="arr_flights">Scheduled arrivals in that month</label>
+          <div class="control">
+            {{ icon("chart", "lead") }}
+            <input id="arr_flights" name="arr_flights" type="number" required inputmode="numeric"
+                   min="1" max="{{ max_flights }}" step="1" placeholder="e.g. 450"
+                   aria-describedby="flights-help typical arr_flights-error">
+          </div>
+          <p class="help" id="flights-help">Flights of this airline planned to land at this airport during the month.</p>
+          <div class="typical" id="typical" hidden>
+            {{ icon("bulb") }}
+            <span id="typical-text"></span>
+            <button type="button" class="chip-btn" id="typical-btn" hidden>Use this value</button>
+          </div>
+          <p class="error" id="arr_flights-error" role="alert"></p>
+        </div>
+
+        <p class="error form-error" id="form-error" role="alert"></p>
+
+        <div class="actions">
+          <button type="submit" class="btn primary" id="submit-btn">
+            <span class="spinner" aria-hidden="true"></span>
+            <span class="btn-text">Check delay risk</span>
+            {{ icon("arrow", "btn-icon") }}
+          </button>
+          <button type="reset" class="btn ghost" id="reset-btn">{{ icon("reset") }}<span>Clear</span></button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ============ Result ============ -->
+    <section class="card result-card" aria-labelledby="result-title" aria-live="polite">
+      <div class="card-head">
+        <span class="step">2</span>
+        <div>
+          <h2 id="result-title">Delay risk</h2>
+          <p class="muted">Prediction, confidence and recommended action.</p>
+        </div>
+      </div>
+
+      <div id="result-empty" class="empty">
+        <div class="empty-art" aria-hidden="true">
+          <span class="orbit"></span>
+          <span class="empty-icon">{{ icon("target") }}</span>
+        </div>
+        <p class="empty-title">Your result will appear here</p>
+        <p class="muted">Enter the route details and press <strong>Check delay risk</strong>.</p>
+        <div class="legend">
+          <div class="legend-item low"><strong>Low</strong><span>&lt; 15% of arrivals delayed</span></div>
+          <div class="legend-item moderate"><strong>Moderate</strong><span>15% &ndash; 25% delayed</span></div>
+          <div class="legend-item high"><strong>High</strong><span>&gt; 25% delayed</span></div>
+        </div>
+        <p class="small muted">"Delayed" = arriving 15 minutes or more after the scheduled time.</p>
+      </div>
+
+      <div id="result" class="result" hidden>
+        <div class="risk-hero" id="risk-hero">
+          <div class="gauge">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="gauge-track" cx="60" cy="60" r="52"/>
+              <circle class="gauge-fill" id="gauge-fill" cx="60" cy="60" r="52"/>
+            </svg>
+            <div class="gauge-text">
+              <strong id="result-confidence"></strong>
+              <span>confidence</span>
+            </div>
+          </div>
+          <div class="risk-text">
+            <span class="pill">Predicted risk level</span>
+            <h3 class="risk-label" id="result-label"></h3>
+            <p id="result-meaning"></p>
+          </div>
+        </div>
+
+        <p class="summary" id="result-summary"></p>
+
+        <div class="action-card">
+          <span class="action-icon">{{ icon("shield") }}</span>
+          <div>
+            <h4>Recommended action</h4>
+            <p id="result-action"></p>
+          </div>
+        </div>
+
+        <h4 class="section-title">How sure is the system?</h4>
+        <div id="result-bars" class="bars"></div>
+
+        <div id="result-warnings" class="warnings" hidden></div>
+
+        <h4 class="section-title">Details of this check</h4>
+        <div id="result-details" class="detail-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ How it works ============ -->
+  <section class="container how" aria-labelledby="how-title">
+    <h2 id="how-title">How it works</h2>
+    <div class="how-grid">
+      <article class="how-card">
+        <span class="how-icon">{{ icon("database") }}</span>
+        <h3>Learns from history</h3>
+        <p>Trained on U.S. Bureau of Transportation Statistics records ({{ data_years }}): monthly arrivals
+          and delays of every airline at every U.S. airport.</p>
+      </article>
+      <article class="how-card">
+        <span class="how-icon">{{ icon("cpu") }}</span>
+        <h3>Compares similar situations</h3>
+        <p>Looks at the airline, the airport, the time of year and how busy the route is, and compares
+          them with similar months in the past.</p>
+      </article>
+      <article class="how-card">
+        <span class="how-icon">{{ icon("target") }}</span>
+        <h3>Gives a clear answer</h3>
+        <p>Shows a risk level, how sure it is and what to do. On past records it had never seen, it was
+          right about <strong>6 times out of 10</strong>; when wrong, it usually picks the next level.</p>
+      </article>
+    </div>
+    <p class="note">{{ icon("info") }} This tool supports planning decisions. It does not include live weather
+      or air-traffic information.</p>
+  </section>
+
+  <footer class="footer">
+    <div class="container">IT3051 Fundamentals of Data Mining &middot; Airline Delay Risk Project</div>
+  </footer>
+
+  <script id="airport-data" type="application/json">{{ airports | tojson }}</script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
