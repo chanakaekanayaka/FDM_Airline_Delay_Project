@@ -88,6 +88,37 @@ h1, h2, h3, h4 { line-height: 1.2; letter-spacing: -0.01em; }
     radial-gradient(500px 260px at 10% 90%, rgba(56, 189, 248, 0.25), transparent 60%);
   pointer-events: none;
 }
+.hero-flight {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  margin-top: -22px;
+  left: -58px;
+  display: flex;
+  align-items: center;
+  opacity: 0.42;
+  pointer-events: none;
+  animation: flight-cross 24s linear infinite;
+}
+.hero-flight-trail {
+  width: clamp(90px, 16vw, 220px);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(191, 219, 254, 0.8));
+}
+.hero-flight-plane {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: #dbeafe;
+  filter: drop-shadow(0 0 8px rgba(147, 197, 253, 0.65));
+  animation: flight-bob 2.8s ease-in-out infinite alternate;
+}
+.flight-plane-icon {
+  width: 30px;
+  height: 30px;
+  transform: rotate(45deg);
+}
 .hero::after {               /* subtle dot grid */
   content: "";
   position: absolute;
@@ -531,6 +562,8 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; marg
 /* ================================================================ animation */
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes flight-cross { to { transform: translateX(calc(100vw + 116px)); } }
+@keyframes flight-bob { to { transform: translateY(-5px); } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
