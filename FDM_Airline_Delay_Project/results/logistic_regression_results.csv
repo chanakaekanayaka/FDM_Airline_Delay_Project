@@ -1,0 +1,2 @@
+Model,Baseline Accuracy,Baseline Precision,Baseline Recall,Baseline F1 (macro),Baseline F1 std,Baseline Train F1,Baseline CV time (s),Baseline High Risk Recall,Tuned F1,Best Params
+Logistic Regression,0.49917503300607197,0.4892060487136655,0.46427213263006567,0.4662666697322629,0.003157410900669919,0.4668036790345228,8.065890073776245,0.28872309520665523,0.4663282047809155,"{""C"": 10, ""class_weight"": null}"

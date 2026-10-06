@@ -1,0 +1,2 @@
+Model,Baseline Accuracy,Baseline Precision,Baseline Recall,Baseline F1 (macro),Baseline F1 std,Baseline Train F1,Baseline CV time (s),Baseline High Risk Recall,Tuned F1,Best Params
+Random Forest,0.6158360928442825,0.6076196482373746,0.5991196799457542,0.6025119879068679,0.0026767632795607,0.9987411521656492,38.68297600746155,0.5222831110524231,0.6121438094596295,"{""max_depth"": 25, ""n_estimators"": 200}"

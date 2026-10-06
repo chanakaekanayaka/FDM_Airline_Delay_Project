@@ -1,0 +1,4 @@
+# Trained model is ~175 MB (over GitHub 100 MB limit) - recreate it by running Final_Model_Comparison.ipynb
+models/final_model.joblib
+
+__pycache__/
