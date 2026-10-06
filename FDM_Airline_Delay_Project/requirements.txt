@@ -1,0 +1,12 @@
+# Same versions that trained and saved models/final_model.joblib.
+# scikit-learn must match exactly, otherwise the saved model may not load correctly.
+scikit-learn==1.9.0
+pandas==3.0.5
+numpy==2.4.6
+joblib==1.6.0
+flask==3.1.3
+
+# Only needed to run the notebooks
+matplotlib==3.11.2
+jupyter
+ipykernel

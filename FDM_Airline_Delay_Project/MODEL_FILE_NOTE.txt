@@ -1,0 +1,14 @@
+About the trained model file
+============================
+
+models/final_model.joblib (the final Random Forest, about 168 MB) is NOT included
+in this zip because the LMS upload limit is 10 MB.
+
+To recreate it (about 5 minutes), with Python 3.11 and the packages in requirements.txt:
+  1. Run Stage_4_Preprocessing.ipynb      -> creates data/train_processed.csv and data/test_processed.csv
+  2. Run Final_Model_Comparison.ipynb     -> creates models/final_model.joblib
+
+Then start the web system:
+  python webapp/app.py   and open http://127.0.0.1:5000
+
+The technical report is submitted separately.
