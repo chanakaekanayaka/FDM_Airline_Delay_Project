@@ -92,8 +92,24 @@ flew to that airport).
 | POST | `/api/predict` | Body: `{"carrier": "DL", "airport": "ATL", "month": 7, "year": 2026, "arr_flights": 2500}` |
 | GET | `/api/typical-flights?carrier=DL&airport=ATL` | Typical monthly arrivals for the route (`null` if no history) |
 | GET | `/api/health` | Checks that the model is loaded |
+| GET | `/api/history` | Saved predictions with optional risk/search filters and `limit`/`offset` pagination (`total_filtered` gives the matching count) |
+| GET | `/api/history/analytics` | Risk counts and saved-prediction trend |
+| GET | `/api/history/export` | CSV export of saved predictions |
+| GET | `/api/business/overview?carrier=DL&year=2023` | History-backed risk counts, high-risk cases, and latest airport/month predictions |
+| POST | `/api/business/compare` | Two same-input model predictions and exact-input matching history |
+| GET | `/api/business/performance` | Verified test-set metrics and model limitations |
 
 `/api/predict` returns **200** with the prediction, or **400** with an error message for each invalid field.
+
+### Business dashboard
+
+The dashboard's risk counts, high-risk cases, and airport/month heatmap summarize saved model predictions in the local SQLite history. The heatmap shows the latest saved prediction for each selected airline, airport, month, and year; each cell includes its scheduled-arrival count because those inputs can differ. A blank cell means no saved prediction, not Low Risk. Scheduled arrivals are not actual delayed-flight counts, and this application does not estimate financial impact.
+
+Airline comparison runs two current model predictions using the same airport, month, year, and scheduled-arrival count. It does not save those comparisons to history. Historical records appear separately and only when all five model inputs match exactly; the comparison is not an airline ranking.
+
+The performance panel reports only the verified held-out test accuracy (0.6286) and macro F1 (0.6153), as documented in `Final_Model_Comparison.ipynb` and checked by `tests/test_system.py`. Class-level precision/recall and a confusion matrix are not published because verified values are not present in the checked project artifacts. Test-set metrics do not measure the reliability of an individual application prediction.
+
+The **Download PDF report** action opens the browser print dialog with a report assembled from current history, comparison selection, and verified performance values. Choose **Save as PDF** in that dialog. This browser-based approach adds no PDF-generation dependency.
 
 ## System testing
 

@@ -23,42 +23,64 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Flight Delay Risk Checker</title>
+  <title>Airline Delay Intelligence</title>
   <link rel="icon" href="data:,">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <header class="hero">
-    <div class="hero-glow" aria-hidden="true"></div>
-    <nav class="container topbar">
-      <div class="brand">
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#overview" aria-label="Airline Delay Intelligence overview">
         <span class="brand-mark">{{ icon("plane") }}</span>
-        <span class="brand-name">Delay<span>Risk</span></span>
+        <span class="brand-name">Airline Delay<br><strong>Intelligence</strong></span>
+      </a>
+      <p class="nav-caption">WORKSPACE</p>
+      <nav class="side-nav" aria-label="Main navigation">
+        <a href="#overview" class="nav-link active" data-view="overview">{{ icon("chart") }}<span>Overview</span></a>
+        <a href="#predict" class="nav-link" data-view="predict">{{ icon("target") }}<span>Predict delay risk</span></a>
+        <a href="#business" class="nav-link" data-view="business">{{ icon("bulb") }}<span>Business impact</span></a>
+        <a href="#heatmap" class="nav-link" data-view="heatmap">{{ icon("pin") }}<span>Airport heatmap</span></a>
+        <a href="#comparison" class="nav-link" data-view="comparison">{{ icon("arrow") }}<span>Airline comparison</span></a>
+        <a href="#performance" class="nav-link" data-view="performance">{{ icon("cpu") }}<span>Model performance</span></a>
+        <a href="#history" class="nav-link" data-view="history">{{ icon("database") }}<span>Prediction history</span></a>
+        <a href="#reports" class="nav-link" data-view="reports">{{ icon("chart") }}<span>Reports</span></a>
+      </nav>
+      <div class="sidebar-foot">
+        <span class="status" id="status" data-state="checking"><span class="status-dot"></span><span id="status-text">Connecting...</span></span>
+        <span class="sidebar-dataset">Historical model · {{ data_years }}</span>
       </div>
-      <span class="status" id="status" data-state="checking">
-        <span class="status-dot"></span><span id="status-text">Connecting...</span>
-      </span>
-    </nav>
+    </aside>
 
-    <div class="container hero-content">
-      <p class="eyebrow">Airline operations planning tool</p>
-      <h1>Flight Delay Risk Checker</h1>
-      <p class="hero-sub">Find out how likely an airline's arrivals at an airport are to be delayed in a given
-        month &ndash; and what to do about it &ndash; in a few seconds.</p>
-
-      <div class="stats">
-        <div class="stat"><strong>{{ n_years }}</strong><span>years of flight data</span></div>
-        <div class="stat"><strong>{{ carriers | length }}</strong><span>airlines</span></div>
-        <div class="stat"><strong>{{ airports | length }}</strong><span>U.S. airports</span></div>
-        <div class="stat"><strong>3</strong><span>risk levels</span></div>
-      </div>
+    <div class="workspace">
+      <header class="app-header">
+        <button type="button" id="sidebar-toggle" class="icon-button" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+        <div><p class="eyebrow">AIRLINE OPERATIONS INTELLIGENCE</p><h1 id="current-view-title">Overview dashboard</h1></div>
+        <span class="header-scope">{{ carriers | length }} airlines <i></i> {{ airports | length }} airports</span>
+      </header>
+      <main id="app-main" class="page-content">
+  <section class="page-view" id="view-overview" data-page-title="Overview dashboard" aria-labelledby="overview-title">
+    <div class="page-heading"><div><p class="eyebrow">OPERATIONS SNAPSHOT</p><h2 id="overview-title">Overview dashboard</h2><p class="muted">Saved model predictions at a glance.</p></div><a class="btn primary" href="#predict">{{ icon("target") }}<span>New prediction</span></a></div>
+    <div id="analytics-empty" class="empty analytics-empty" hidden><p class="empty-title">No saved predictions yet</p><p class="muted">Run a prediction to begin building this operations snapshot.</p><a href="#predict" class="text-link">Go to prediction</a></div>
+    <div id="analytics-grid" class="analytics-grid overview-metrics">
+      <article class="metric-card metric-total"><span>Total predictions</span><strong id="metric-total">0</strong></article>
+      <article class="metric-card metric-low"><span>Low Risk</span><strong id="metric-low">0</strong></article>
+      <article class="metric-card metric-moderate"><span>Moderate Risk</span><strong id="metric-moderate">0</strong></article>
+      <article class="metric-card metric-high"><span>High Risk</span><strong id="metric-high">0</strong></article>
     </div>
-  </header>
+    <div class="overview-grid">
+      <section class="surface-panel overview-chart"><div class="panel-heading"><div><h3>Risk distribution</h3><p class="muted">Saved prediction categories</p></div></div><div class="donut-layout"><div id="risk-donut" class="donut-chart"><div class="donut-center"><strong id="donut-total">0</strong><span>saved</span></div></div><ul id="risk-legend" class="risk-legend"></ul></div></section>
+      <section class="surface-panel overview-chart"><div class="panel-heading"><div><h3>Recent activity</h3><p class="muted">Prediction count by saved date</p></div><a class="text-link" href="#history">View history</a></div><div id="trend-chart" class="trend-chart" aria-label="Prediction trend chart"></div></section>
+      <section class="surface-panel overview-highrisk"><div class="panel-heading"><div><h3>Recent high-risk cases</h3><p class="muted">Prioritize review, not a guarantee of delay</p></div><a class="text-link" href="#business">All business insights</a></div><div id="overview-high-risk" class="overview-high-risk-list"></div></section>
+      <section class="surface-panel overview-shortcuts"><div class="panel-heading"><div><h3>Workspace</h3><p class="muted">Go directly to a decision-support view</p></div></div><div class="shortcut-list"><a href="#heatmap">Airport risk heatmap <span>→</span></a><a href="#comparison">Compare airlines <span>→</span></a><a href="#performance">Model reliability <span>→</span></a><a href="#reports">Business report <span>→</span></a></div></section>
+    </div>
+  </section>
 
-  <main class="container layout">
+  <section class="page-view" id="view-predict" data-page-title="Predict delay risk" aria-labelledby="predict-title" hidden>
+    <div class="page-heading"><div><p class="eyebrow">MONTHLY ROUTE ESTIMATE</p><h2 id="predict-title">Predict delay risk</h2><p class="muted">Enter the operating context for one airline and arrival airport.</p></div></div>
+  <div class="layout">
     <section class="card form-card" aria-labelledby="form-title">
       <div class="card-head">
         <span class="step">1</span>
@@ -221,71 +243,139 @@
         <div id="result-details" class="detail-grid"></div>
       </div>
     </section>
-  </main>
+  </div>
+  </section>
 
-  <section class="container analytics-shell">
+  <section class="page-view" id="view-business" data-page-title="Business impact" aria-labelledby="business-impact-title" hidden>
     <div class="card analytics-card">
-      <div class="card-head">
-        <span class="step">3</span>
-        <div>
-          <h2>Analytics dashboard</h2>
-          <p class="muted">Saved prediction history only.</p>
-        </div>
-      </div>
-
-      <div id="analytics-empty" class="empty analytics-empty" hidden>
-        <p class="empty-title">No saved predictions yet</p>
-        <p class="muted">Once you run a prediction, this dashboard will show the totals and trends.</p>
-      </div>
-
-      <div id="analytics-grid" class="analytics-grid">
-        <article class="metric-card metric-total">
-          <span>Total predictions</span>
-          <strong id="metric-total">0</strong>
-        </article>
-        <article class="metric-card metric-low">
-          <span>Low Risk</span>
-          <strong id="metric-low">0</strong>
-        </article>
-        <article class="metric-card metric-moderate">
-          <span>Moderate Risk</span>
-          <strong id="metric-moderate">0</strong>
-        </article>
-        <article class="metric-card metric-high">
-          <span>High Risk</span>
-          <strong id="metric-high">0</strong>
-        </article>
-      </div>
-
-      <div class="chart-grid">
-        <div class="chart-card">
-          <h3>Risk distribution</h3>
-          <div class="donut-layout">
-            <div id="risk-donut" class="donut-chart">
-              <div class="donut-center">
-                <strong id="donut-total">0</strong>
-                <span>saved</span>
-              </div>
-            </div>
-            <ul id="risk-legend" class="risk-legend"></ul>
+      <section class="business-section" aria-labelledby="business-impact-title">
+        <div class="business-heading">
+          <div>
+            <h3 id="business-impact-title">Business impact</h3>
+            <p class="muted">Operational planning signals from saved model predictions, not observed delay outcomes.</p>
           </div>
         </div>
-
-        <div class="chart-card">
-          <h3>Prediction trend</h3>
-          <div id="trend-chart" class="trend-chart" aria-label="Prediction trend chart"></div>
+        <div id="business-risk-counts" class="business-risk-counts" aria-label="Predictions by risk category"></div>
+        <p class="method-note">Scheduled arrivals are the volume supplied for a prediction. They are not a count of delayed flights. This history does not support a reliable delayed-arrival or financial-impact estimate.</p>
+        <div class="impact-breakdown-grid">
+          <section class="impact-breakdown"><h4>Risk distribution by airline</h4><div id="risk-by-airline"></div></section>
+          <section class="impact-breakdown"><h4>Risk distribution by airport</h4><div id="risk-by-airport"></div></section>
         </div>
-      </div>
+        <h4 class="section-title">High-risk planning cases</h4>
+        <div id="business-cases-empty" class="empty compact-empty" hidden>No high-risk records are available in saved history.</div>
+        <div id="business-cases-wrap" class="business-table-wrap" hidden>
+          <table class="business-table">
+            <thead><tr><th>Airline</th><th>Airport</th><th>Month / year</th><th>Scheduled arrivals</th><th>Predicted risk</th></tr></thead>
+            <tbody id="business-cases-body"></tbody>
+          </table>
+          <p id="business-cases-note" class="small muted"></p>
+        </div>
+        <h4 class="section-title">Planning recommendations</h4>
+        <ul class="recommendations-list">
+          <li>Review staffing and gate coverage for high-risk route periods.</li>
+          <li>Check schedule buffers and contingency options before the operating month.</li>
+          <li>Prepare passenger communication plans; confirm details against current airline and airport operations.</li>
+        </ul>
+      </section>
     </div>
   </section>
 
-  <section class="container history-shell">
+  <section class="page-view" id="view-heatmap" data-page-title="Airport heatmap" aria-labelledby="heatmap-title" hidden>
+    <div class="card analytics-card"><section class="business-section first-business-section" aria-labelledby="heatmap-title">
+        <div class="business-heading">
+          <div>
+            <h3 id="heatmap-title">Airport risk heatmap</h3>
+            <p class="muted">Latest saved prediction by airport and month for the selected airline and year.</p>
+          </div>
+          <div class="heatmap-filters">
+            <label class="toolbar-field"><span>Airline</span>
+              <select id="heatmap-carrier">
+                {% for code, name in carriers %}<option value="{{ code }}">{{ name }} ({{ code }})</option>{% endfor %}
+              </select>
+            </label>
+            <label class="toolbar-field"><span>Year</span><select id="heatmap-year" aria-label="Heatmap year"></select></label>
+          </div>
+        </div>
+        <div class="risk-legend-inline" aria-label="Risk legend">
+          <span><i class="risk-swatch low"></i>Low Risk</span>
+          <span><i class="risk-swatch moderate"></i>Moderate Risk</span>
+          <span><i class="risk-swatch high"></i>High Risk</span>
+          <span><i class="risk-swatch missing"></i>No saved prediction</span>
+        </div>
+        <div id="heatmap-empty" class="empty compact-empty" hidden>No predictions for this airline and year yet.</div>
+        <div id="airport-heatmap" class="airport-heatmap" role="table" aria-label="Airport risk by month"></div>
+        <p id="heatmap-method" class="method-note">Missing cells mean no saved prediction, not Low Risk. Each populated cell uses the latest saved prediction; scheduled arrivals can differ between cells and are shown in its accessible details.</p>
+      </section>
+    </div>
+  </section>
+
+  <section class="page-view" id="view-comparison" data-page-title="Airline comparison" aria-labelledby="comparison-title" hidden>
+    <div class="card analytics-card"><section class="business-section first-business-section" aria-labelledby="comparison-title">
+        <div class="business-heading">
+          <div>
+            <h3 id="comparison-title">Airline comparison</h3>
+            <p class="muted">Compare current model predictions on the same airport, period, and arrival-count inputs.</p>
+          </div>
+        </div>
+        <form id="comparison-form" class="comparison-form">
+          <label class="toolbar-field"><span>Airline A</span>
+            <select id="compare-carrier-a" required>
+              {% for code, name in carriers %}<option value="{{ code }}">{{ name }} ({{ code }})</option>{% endfor %}
+            </select>
+          </label>
+          <label class="toolbar-field"><span>Airline B</span>
+            <select id="compare-carrier-b" required>
+              {% for code, name in carriers %}<option value="{{ code }}" {% if loop.index == 2 %}selected{% endif %}>{{ name }} ({{ code }})</option>{% endfor %}
+            </select>
+          </label>
+          <label class="toolbar-field"><span>Airport</span>
+            <select id="compare-airport" required>
+              {% for code, name in airports %}<option value="{{ code }}" {% if code == 'ATL' %}selected{% endif %}>{{ name }} ({{ code }})</option>{% endfor %}
+            </select>
+          </label>
+          <label class="toolbar-field"><span>Month</span>
+            <select id="compare-month" required>
+              {% for number, name in months %}<option value="{{ number }}" {% if number == 7 %}selected{% endif %}>{{ name }}</option>{% endfor %}
+            </select>
+          </label>
+          <label class="toolbar-field"><span>Year</span>
+            <input id="compare-year" type="number" min="{{ first_year }}" max="{{ last_year + 10 }}" value="{{ last_year }}" required>
+          </label>
+          <label class="toolbar-field"><span>Scheduled arrivals</span>
+            <input id="compare-arrivals" type="number" min="1" max="{{ max_flights }}" value="2500" required>
+          </label>
+          <button id="compare-btn" type="submit" class="btn primary">Compare airlines</button>
+        </form>
+        <p id="comparison-status" class="method-note" role="status" aria-live="polite"></p>
+        <div id="comparison-results" class="comparison-results" aria-live="polite"></div>
+        <p class="method-note">Historical records are listed separately and included only when airline, airport, month, year, and scheduled arrivals match exactly. This comparison is not an overall airline ranking.</p>
+      </section>
+    </div>
+  </section>
+
+  <section class="page-view" id="view-performance" data-page-title="Model performance" aria-labelledby="performance-title" hidden>
+    <div class="card analytics-card"><section class="business-section first-business-section" aria-labelledby="performance-title">
+        <div class="business-heading">
+          <div>
+            <h3 id="performance-title">Model performance and limitations</h3>
+            <p class="muted">Held-out test-set metrics, separate from the predictions saved by this application.</p>
+          </div>
+        </div>
+        <div id="performance-metrics" class="performance-metrics" aria-live="polite">
+          <p class="method-note">Loading verified evaluation metrics...</p>
+        </div>
+        <ul id="performance-limitations" class="limitations-list"></ul>
+      </section>
+    </div>
+  </section>
+
+  <section class="page-view" id="view-history" data-page-title="Prediction history" aria-labelledby="history-title" hidden>
     <div class="card history-card">
       <div class="card-head history-header">
         <div class="history-title-wrap">
           <span class="step">4</span>
           <div>
-            <h2>Prediction history</h2>
+            <h2 id="history-title">Prediction history</h2>
             <p class="muted">Saved records from recent predictions.</p>
           </div>
         </div>
@@ -331,38 +421,35 @@
           <tbody id="history-body"></tbody>
         </table>
       </div>
+      <div class="history-pagination">
+        <span id="history-page-label" class="muted" aria-live="polite">Page 1</span>
+        <div><button id="history-prev" type="button" class="btn ghost" disabled>Previous</button><button id="history-next" type="button" class="btn ghost" disabled>Next</button></div>
+      </div>
     </div>
   </section>
 
-  <section class="container how" aria-labelledby="how-title">
-    <h2 id="how-title">How it works</h2>
-    <div class="how-grid">
-      <article class="how-card">
-        <span class="how-icon">{{ icon("database") }}</span>
-        <h3>Learns from history</h3>
-        <p>Trained on U.S. Bureau of Transportation Statistics records ({{ data_years }}): monthly arrivals
-          and delays of every airline at every U.S. airport.</p>
-      </article>
-      <article class="how-card">
-        <span class="how-icon">{{ icon("cpu") }}</span>
-        <h3>Compares similar situations</h3>
-        <p>Looks at the airline, the airport, the time of year and how busy the route is, and compares
-          them with similar months in the past.</p>
-      </article>
-      <article class="how-card">
-        <span class="how-icon">{{ icon("target") }}</span>
-        <h3>Gives a clear answer</h3>
-        <p>Shows a risk level, how sure it is and what to do. On past records it had never seen, it was
-          right about <strong>6 times out of 10</strong>; when wrong, it usually picks the next level.</p>
-      </article>
+  <section class="page-view" id="view-reports" data-page-title="Reports" aria-labelledby="reports-title" hidden>
+    <div class="card report-controls-card">
+      <div class="page-heading"><div><p class="eyebrow">SHAREABLE OUTPUT</p><h2 id="reports-title">Business reports</h2><p class="muted">Generate a PDF-ready summary from saved predictions and verified model evaluation results.</p></div></div>
+      <div class="report-scope-controls"><label class="toolbar-field"><span>Airline scope</span><select id="report-carrier">{% for code, name in carriers %}<option value="{{ code }}">{{ name }} ({{ code }})</option>{% endfor %}</select></label><label class="toolbar-field"><span>Year scope</span><select id="report-year"><option value="">Latest available</option></select></label>
+        <button id="pdf-report-btn" type="button" class="btn primary" title="Open the print dialog to save a PDF report">{{ icon("chart") }}<span>Generate PDF business report</span></button>
+      </div>
+      <p id="report-feedback" class="method-note" role="status" aria-live="polite">Report includes executive summary, risk counts, high-risk cases, selected airline/year airport overview, optional airline comparison, verified test metrics, limitations, and planning recommendations. The browser print dialog lets you save the report as PDF.</p>
     </div>
-    <p class="note">{{ icon("info") }} This tool supports planning decisions. It does not include live weather
-      or air-traffic information.</p>
   </section>
 
   <footer class="footer">
-    <div class="container">IT3051 Fundamentals of Data Mining &middot; Airline Delay Risk Project</div>
+    <div>IT3051 Fundamentals of Data Mining &middot; Airline Delay Risk Project</div>
   </footer>
+
+  <section id="business-report" class="business-report" hidden aria-label="Airline delay business report">
+    <div id="business-report-content"></div>
+  </section>
+  <p id="report-status" class="sr-only" role="status" aria-live="polite"></p>
+
+      </main>
+    </div>
+  </div>
 
   <script id="airport-data" type="application/json">{{ airports | tojson }}</script>
   <script src="{{ url_for('static', filename='app.js') }}"></script>
