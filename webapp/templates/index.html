@@ -31,7 +31,6 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <!-- ============ Top bar + hero ============ -->
   <header class="hero">
     <div class="hero-glow" aria-hidden="true"></div>
     <nav class="container topbar">
@@ -60,7 +59,6 @@
   </header>
 
   <main class="container layout">
-    <!-- ============ Input form ============ -->
     <section class="card form-card" aria-labelledby="form-title">
       <div class="card-head">
         <span class="step">1</span>
@@ -159,7 +157,6 @@
       </form>
     </section>
 
-    <!-- ============ Result ============ -->
     <section class="card result-card" aria-labelledby="result-title" aria-live="polite">
       <div class="card-head">
         <span class="step">2</span>
@@ -203,6 +200,8 @@
           </div>
         </div>
 
+        <div id="risk-alert" class="risk-alert" aria-live="polite"></div>
+
         <p class="summary" id="result-summary"></p>
 
         <div class="action-card">
@@ -224,7 +223,117 @@
     </section>
   </main>
 
-  <!-- ============ How it works ============ -->
+  <section class="container analytics-shell">
+    <div class="card analytics-card">
+      <div class="card-head">
+        <span class="step">3</span>
+        <div>
+          <h2>Analytics dashboard</h2>
+          <p class="muted">Saved prediction history only.</p>
+        </div>
+      </div>
+
+      <div id="analytics-empty" class="empty analytics-empty" hidden>
+        <p class="empty-title">No saved predictions yet</p>
+        <p class="muted">Once you run a prediction, this dashboard will show the totals and trends.</p>
+      </div>
+
+      <div id="analytics-grid" class="analytics-grid">
+        <article class="metric-card metric-total">
+          <span>Total predictions</span>
+          <strong id="metric-total">0</strong>
+        </article>
+        <article class="metric-card metric-low">
+          <span>Low Risk</span>
+          <strong id="metric-low">0</strong>
+        </article>
+        <article class="metric-card metric-moderate">
+          <span>Moderate Risk</span>
+          <strong id="metric-moderate">0</strong>
+        </article>
+        <article class="metric-card metric-high">
+          <span>High Risk</span>
+          <strong id="metric-high">0</strong>
+        </article>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>Risk distribution</h3>
+          <div class="donut-layout">
+            <div id="risk-donut" class="donut-chart">
+              <div class="donut-center">
+                <strong id="donut-total">0</strong>
+                <span>saved</span>
+              </div>
+            </div>
+            <ul id="risk-legend" class="risk-legend"></ul>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Prediction trend</h3>
+          <div id="trend-chart" class="trend-chart" aria-label="Prediction trend chart"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="container history-shell">
+    <div class="card history-card">
+      <div class="card-head history-header">
+        <div class="history-title-wrap">
+          <span class="step">4</span>
+          <div>
+            <h2>Prediction history</h2>
+            <p class="muted">Saved records from recent predictions.</p>
+          </div>
+        </div>
+        <button id="export-csv-btn" type="button" class="btn ghost export-btn">{{ icon("chart") }}<span>Export CSV</span></button>
+      </div>
+
+      <div class="history-toolbar">
+        <label class="toolbar-field">
+          <span>Risk</span>
+          <select id="history-risk-filter">
+            <option value="all">All categories</option>
+            <option value="low">Low Risk</option>
+            <option value="moderate">Moderate Risk</option>
+            <option value="high">High Risk</option>
+          </select>
+        </label>
+
+        <label class="toolbar-field toolbar-search">
+          <span>Search</span>
+          <input id="history-search" type="search" placeholder="Carrier or airport">
+        </label>
+      </div>
+
+      <div id="history-empty" class="empty history-empty" hidden>
+        <p class="empty-title">No saved predictions yet</p>
+        <p class="muted">Your history table will show each successful prediction here.</p>
+      </div>
+
+      <div id="history-table-wrap" class="history-table-wrap">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Carrier</th>
+              <th>Airport</th>
+              <th>Month</th>
+              <th>Year</th>
+              <th>Arrivals</th>
+              <th>Risk</th>
+              <th>Confidence</th>
+            </tr>
+          </thead>
+          <tbody id="history-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <section class="container how" aria-labelledby="how-title">
     <h2 id="how-title">How it works</h2>
     <div class="how-grid">
@@ -258,4 +367,6 @@
   <script id="airport-data" type="application/json">{{ airports | tojson }}</script>
   <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
+</html>
+
 </html>
