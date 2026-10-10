@@ -42,7 +42,7 @@ class TestApi(unittest.TestCase):
         res = self.client.get("/")
         self.assertEqual(res.status_code, 200)
         page = res.get_data(as_text=True)
-        self.assertIn("Flight Delay Risk Checker", page)
+        self.assertIn("Airline Delay Intelligence", page)
         self.assertIn('value="DL"', page)
         self.assertIn('value="ATL"', page)
 
